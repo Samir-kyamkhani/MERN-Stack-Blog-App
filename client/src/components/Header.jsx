@@ -13,7 +13,7 @@ function Header() {
           <h3>Blog App</h3>
         </Link>
         <ul className='nav__menu'>
-          <li><Link to="/profile">Samir</Link></li>
+          <li><Link to="/profile/samir">Samir</Link></li>
           <li><Link to="/create">Create Post</Link></li>
           <li><Link to="/authors">Authors</Link></li>
           <li><Link to="/logout">Logout</Link></li>

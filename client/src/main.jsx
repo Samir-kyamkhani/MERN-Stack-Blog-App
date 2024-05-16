@@ -23,18 +23,18 @@ const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<Layout/>} errorElement={<ErrorPage/>}>
       <Route index={true} element={<Home/>}/>
-      <Route path='/posts/:id' element={<PostDetails/>}/>
-      <Route path='/register' element={<Register/>}/>
-      <Route path='/profile/:id' element={<UserProfile/>}/>
-      <Route path='/logout' element={<Logout/>}/>
-      <Route path='/login' element={<Login/>}/>
-      <Route path='/posts/:id/edit' element={<EditPost/>}/>
-      <Route path='/delete:id' element={<DeletePost/>}/>
-      <Route path='/myposts/:id' element={<Dashboard/>}/>
-      <Route path='/create' element={<CreatePost/>}/>
-      <Route path='/posts/categories/:category' element={<CategoryPosts/>}/>
-      <Route path='/authors' element={<Authors/>}/>
-      <Route path='/posts/users/:id' element={<AuthorPosts/>}/>
+      <Route path='posts/:id' element={<PostDetails/>}/>
+      <Route path='register' element={<Register/>}/>
+      <Route path='profile/:id' element={<UserProfile/>}/>
+      <Route path='logout' element={<Logout/>}/>
+      <Route path='login' element={<Login/>}/>
+      <Route path='posts/:id/edit' element={<EditPost/>}/>
+      <Route path='delete:id' element={<DeletePost/>}/>
+      <Route path='myposts/:id' element={<Dashboard/>}/>
+      <Route path='create' element={<CreatePost/>}/>
+      <Route path='posts/categories/:category' element={<CategoryPosts/>}/>
+      <Route path='authors' element={<Authors/>}/>
+      <Route path='posts/users/:id' element={<AuthorPosts/>}/>
     </Route>
   )
 )
