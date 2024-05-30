@@ -2,7 +2,11 @@ import React from 'react'
 
 function Logout() {
   return (
-    <div>Logout</div>
+    <section className='logout'>
+      
+      <h1>Successfully Logout</h1>
+
+    </section>
   )
 }
 

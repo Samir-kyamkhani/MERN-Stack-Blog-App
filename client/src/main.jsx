@@ -29,7 +29,7 @@ const router = createBrowserRouter(
       <Route path='logout' element={<Logout/>}/>
       <Route path='login' element={<Login/>}/>
       <Route path='posts/:id/edit' element={<EditPost/>}/>
-      <Route path='delete:id' element={<DeletePost/>}/>
+      <Route path='posts/:id/delete' element={<DeletePost/>}/>
       <Route path='myposts/:id' element={<Dashboard/>}/>
       <Route path='create' element={<CreatePost/>}/>
       <Route path='posts/categories/:category' element={<CategoryPosts/>}/>

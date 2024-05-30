@@ -19,7 +19,7 @@ function UserProfile() {
   return (
     <section className='profile'>
       <div className="container profile__container">
-        <Link to={`/mypost/samir`} className='btn'>My Posts</Link>
+        <Link to={`/myposts/dcx`} className='btn'>My Posts</Link>
         <div className="profile__details">
           <div className="avatar__wrapper">
             <div className="profile__avatar">
