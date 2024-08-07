@@ -16,7 +16,7 @@
     --transition: all 300ms ease;
 
     ---container-width-lg: 84%;
-    ---container-width-md: 92%;
+    ---container-width-md: 100%;
     --form-width: 50%;
 
     --radius-1: 0.3rem;
@@ -238,7 +238,7 @@ footer {
 
 .post {
     background: var(--color-white);
-    padding: 1rem;
+    padding: 1rem, 1.5rem;
     border-radius: var(--radius-4);
     padding-bottom: 2rem;
     transition: var(--transition);

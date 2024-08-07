@@ -18,10 +18,12 @@ import Authors from './pages/Authors'
 import UserProfile from './pages/UserProfile'
 import AuthorPosts from './pages/AuthorPosts'
 
+import {store} from './app/store'
+import { Provider } from'react-redux'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='/' element={<Layout/>} errorElement={<ErrorPage/>}>
+    <Route path='/' element={<Provider store={store}> <Layout/> </Provider>} errorElement={<ErrorPage/>}>
       <Route index={true} element={<Home/>}/>
       <Route path='posts/:id' element={<PostDetails/>}/>
       <Route path='register' element={<Register/>}/>

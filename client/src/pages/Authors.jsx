@@ -1,39 +1,62 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-
-import Avatar1 from "../images/avatar1.jpg"
-import Avatar2 from "../images/avatar2.jpg"
-import Avatar3 from "../images/avatar3.jpg"
-import Avatar4 from "../images/avatar4.jpg"
-import Avatar5 from "../images/avatar5.jpg"
-
-const authorsData = [
-  {id: 1, avatar: Avatar1, name: "Samir", posts: 1},
-  {id: 2, avatar: Avatar2, name: "khan", posts: 2},
-  {id: 3, avatar: Avatar3, name: "roy", posts: 3},
-  {id: 4, avatar: Avatar4, name: "ab", posts: 4},
-  {id: 5, avatar: Avatar5, name: "new", posts: 5},
-]
+import {useDispatch, useSelector} from 'react-redux'
+import { getAllAuthors } from '../slices/postSlice.js'
 
 function Authors() {
 
-  const [authors, setAuthors] = useState(authorsData)
+  const [authors, setAuthors] = useState([])
+  
+  const dispatch = useDispatch()
+  const {allauthors, isLoading, error} = useSelector(state => state.post)
+  
+
+  useEffect(() => {
+      dispatch(getAllAuthors())
+  }, [dispatch])
+
+  useEffect(() => {
+    if (allauthors) {
+      setAuthors(allauthors)
+    }
+  }, [allauthors])
+
+  if (isLoading) { 
+    return (
+      <section className="center">
+        <div className="container">
+          <h1>Loading...</h1>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="center">
+        <div className="container">
+          <h1>Error: {error}</h1>
+        </div>
+      </section>
+    );
+  }
+
 
   return (
     <section className='authors'>
       {authors.length > 0 ? <div className="container authors__container">
-        {authors?.map(({id, avatar, name, posts}) => (
-          <Link key={id} to={`/posts/users/${id}`} className='author'>
+        {authors?.map(({_id, avatar, fullName, posts}) => (
+          <Link key={_id} to={`/posts/users/${_id}`} className='author'>
             <div className="author__avatar">
               <img src={avatar} alt={`image of ${name}`} />
             </div>
             <div className="author__info">
-              <h4>{name}</h4>
-              <p>{posts}</p>
+              <h4>{fullName}</h4>
+              <p>User post: {posts}</p>
             </div>
           </Link>
         ))}
-      </div> : <h2 className='center'>No Authors/users found.</h2> }
+      </div> : <h2 className='center'>No Authors found.</h2> }
     </section>
   )
 }

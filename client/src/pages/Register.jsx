@@ -1,17 +1,23 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { register } from '../slices/authSlice.js'
+import { useDispatch, useSelector } from'react-redux'
 
 function Register() {
 
   const [userData, setUserData] = useState({
-    name: '',
+    fullName: '',
     email: '',
     password: '',
-    password2: '',
-  })
+    confirmPassword: '',
+  }) 
+  
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const {registerUser, error} = useSelector(state => state.auth)
+
 
   const changeInputHandler = (e) => {
-    e.preventDefault()
     setUserData(prevState => {
       return {
         ...prevState,
@@ -19,16 +25,27 @@ function Register() {
       }
     })
   }
+
+  const handleSubmitRegister = (e) => {
+    e.preventDefault()
+    dispatch(register(userData))
+    setUserData("")
+  }
+
+  useEffect(() => {
+    registerUser?.message ? navigate('/login') : {}
+  })
+
   return (
     <section className='register'>
       <div className="container">
         <h2>Sign up</h2>
-        <form className="form register__form">
-          <p className="form__error-message">This is error msg</p>
-          <input type="text" placeholder='Full Name' name='name' value={userData.name} onChange={changeInputHandler}/>
+        <form className="form register__form" onSubmit={handleSubmitRegister }>
+          {error && <p className="form__error-message">{error}</p>}
+          <input type="text" placeholder='Full Name' name='fullName' value={userData.fullName} onChange={changeInputHandler}/>
           <input type="text" placeholder='Email' name='email' value={userData.email} onChange={changeInputHandler}/>
           <input type="password" placeholder='Password' name='password' value={userData.password} onChange={changeInputHandler}/>
-          <input type="password" placeholder='Confirm Password' name='password2' value={userData.password2} onChange={changeInputHandler}/>
+          <input type="password" placeholder='Confirm Password' name='confirmPassword' value={userData.confirmPassword} onChange={changeInputHandler}/>
           <button type='submit' className="btn primary">Register</button>
         </form>
         <small>Already have an account? <Link to="/login">Sign in</Link></small>

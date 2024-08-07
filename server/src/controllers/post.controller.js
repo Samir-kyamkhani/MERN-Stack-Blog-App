@@ -1,7 +1,8 @@
 import { asyncHandler } from "../utils/asynchandler.js";
 import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary , deleteOnCloudinary} from "../utils/cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
@@ -68,7 +69,7 @@ const getPosts = asyncHandler(async (req, res) => {
 });
 
 const getPost = asyncHandler(async (req, res) => {
-  const postId = req.params._id;
+  const postId = req.params.id;
 
   const post = await Post.findById(postId);
 
@@ -94,9 +95,10 @@ const getCatPosts = asyncHandler(async (req, res) => {
 });
 
 const getUserPosts = asyncHandler(async (req, res) => {
-  const { _id } = req.params;
+  const id = req.params.id;
 
-  const posts = await Post.find({ createdBy: _id }).sort({ createdAt: -1 });
+  
+  const posts = await Post.find({ createdBy: id }).sort({ createdAt: -1 });
 
   if (!posts) {
     throw new ApiError(404, "User post not found");
@@ -109,7 +111,8 @@ const getUserPosts = asyncHandler(async (req, res) => {
 
 const editPost = asyncHandler(async (req, res) => {
   let updatedPost;
-  const postId = req.params._id;
+  const postId = req.params.id;
+  
   const { title, description, category } = req.body;
 
   if ([title, description, category].some((field) => field?.trim() === "")) {
@@ -131,6 +134,12 @@ const editPost = asyncHandler(async (req, res) => {
       },
     );
   } else {
+
+    //Old thumbnail deletee
+    const findePost = await Post.findById(postId);
+    await deleteOnCloudinary(findePost);
+    
+
     const thumbnailLocalFilePath = req.file.path;
 
     if (!thumbnailLocalFilePath) {
@@ -173,7 +182,7 @@ const editPost = asyncHandler(async (req, res) => {
 });
 
 const deletePost = asyncHandler(async (req, res) => {
-  const postId = req.params._id;
+  const postId = req.params.id;
   let newPost;
 
   if (!postId) {
