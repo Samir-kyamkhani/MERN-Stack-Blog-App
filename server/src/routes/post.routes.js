@@ -18,15 +18,15 @@ const router = Router()
 // Secure post route, we are using verifyJwt middleware to verify the jwt token.
 router.route("/create-post").post(verifyJwt, upload.single("thumbnail"), createPost);
 
-router.route("/:_id").patch(verifyJwt, upload.single("thumbnail"), editPost);
-router.route("/:_id").delete(verifyJwt, deletePost);
-
+router.route("/:id").patch(verifyJwt, upload.single("thumbnail"), editPost);
+router.route("/:id").delete(verifyJwt, deletePost);
+ 
 
 
 router.route("/").get(getPosts)
-router.route("/:_id").get(getPost);
+router.route("/:id").get(getPost);
 router.route("/categories/:category").get(getCatPosts);
-router.route("/users/:_id").get(getUserPosts);
+router.route("/users/:id").get(getUserPosts);
 
 
 
