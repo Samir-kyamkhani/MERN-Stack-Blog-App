@@ -24,7 +24,6 @@ const userSchema = new Schema(
         },
         avatar: {
             type: String, //letter on cloudinary
-            required: true
         },
         posts: {
             type: Number,
@@ -43,16 +42,19 @@ userSchema.pre("save", async function (next) {
 
 
 userSchema.methods.comparePassword = async function (password) {
-    return await bcrypt.compare(password, this.password)
+    try {
+        return await bcrypt.compare(password, this.password);
+    } catch (error) {
+        throw new Error('Error comparing passwords');
+    }
 }
 
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
         //payload || data
         {
-            _id: this._id,
+            id: this._id,
             email: this.email,
-            username: this.username,
             fullName: this.fullName,
         },
         // Secret key
@@ -70,7 +72,7 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
     return jwt.sign(
         {
-            _id: this._id
+            id: this._id
         },
 
         process.env.REFRESH_TOKEN_SECRET,
