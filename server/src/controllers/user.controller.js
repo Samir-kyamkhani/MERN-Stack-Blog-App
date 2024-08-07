@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/asynchandler.js"
 import { User } from "../models/user.model.js"
-import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { uploadOnCloudinary, deleteOnCloudinary } from "../utils/cloudinary.js"
 import { ApiError } from "../utils/ApiError.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken";
@@ -55,17 +55,6 @@ const userSignup = asyncHandler( async ( req, res ) => {
         throw new ApiError(400, "Your password dosent match !")
     }
 
-    const avatarLocalFilePath = req.file.path;
-
-    if (!avatarLocalFilePath) {
-        throw new ApiError(400, "Please upload avatar")
-    }
-
-    const avatar = await uploadOnCloudinary(avatarLocalFilePath)
-
-    if (!avatar) {
-        throw new ApiError(400, "Error while uploading avatar")
-    }
 
     const exitedUser = await User.findOne({
         $or: [
@@ -79,10 +68,10 @@ const userSignup = asyncHandler( async ( req, res ) => {
 
     const user = await User.create({
         fullName,
-        email: email.toLowerCase() && email.trim(),
-        avatar: avatar.url,
-        password: password.trim(),
-        confirmPassword: confirmPassword.trim()
+        email: email?.toLowerCase() && email?.trim(),
+        // avatar: avatar?.url,
+        password: password?.trim(),
+        confirmPassword: confirmPassword?.trim()
     })
 
     const cretedUser = await User.findById(user._id).select(
@@ -113,15 +102,14 @@ const userLogin = asyncHandler( async ( req, res ) => {
 
     const {email, password} = req.body;
 
-    if (!email && !password) {
-        throw new ApiError(400 , "All fields are requried !")
+    if (
+        [email, password].some((field) => field?.trim() === "")
+    ) {
+        throw new ApiError(400, "All fields are required !")
     }
 
-    const user = await User.findOne({
-        $or: [
-            {email},
-        ]
-    })
+    const user = await User.findOne({ email });
+
 
     if (!user) {
         throw new ApiError(404, "Account not found..")
@@ -181,8 +169,10 @@ const userLogout = asyncHandler( async ( req, res ) => {
 
 const getCurrentUser = asyncHandler( async ( req, res ) => {
     
-    const {_id} = req.params
-    const user = await User.findById(_id).select("-password -refreshToken")
+    const id = req.params?.id;
+    const user = await User.findById(id).select("-password -refreshToken")
+    
+    
 
     if (!user) {
         throw new ApiError(404, "User not found !")
@@ -199,7 +189,7 @@ const getCurrentUser = asyncHandler( async ( req, res ) => {
 //Ignore it
 const getAuthores = asyncHandler( async ( req, res ) => {
     const authors = await User.find().select(" -password -refreshToken")
-
+    
     if (!authors) {
         throw new ApiError(404, "There is no authors found !")
     }
@@ -221,11 +211,18 @@ const updateUserAvatar = asyncHandler( async ( req, res ) => {
     // 5. Get user and update the avavtar
     // 6. Return the user and remove the password
 
+    let postId = req.user?._id;
+
+    //Old thumbnail deletee
+    const findePost = await User.findById(postId);
+    await deleteOnCloudinary(findePost);
+
     const avatarLocalFilePath = req.file.path
 
     if (!avatarLocalFilePath) {
         throw new ApiError(400, "Avatar file missing !")
     }
+
 
     const avatar  = await uploadOnCloudinary(avatarLocalFilePath)
 
@@ -234,7 +231,7 @@ const updateUserAvatar = asyncHandler( async ( req, res ) => {
     }
 
     const user = await User.findByIdAndUpdate(
-        req.user?._id,
+        postId,
         {
             $set: {
                 avatar: avatar.url,
@@ -253,38 +250,82 @@ const updateUserAvatar = asyncHandler( async ( req, res ) => {
 
 } )
 
-const updateUserDetails = asyncHandler( async ( req, res ) => {
-    // Algorithem to Update user Details
-    // 1. get details from req body
-    // 2. Validation for details are field or not
-    // 3. Get user and update details
-    // 4. Return user remove the password
-
-    const {fullName, email} = req.body
-
-    if (!fullName && !email) {
-        throw new ApiError(400 , "All fields are reqired !")
+const updateUserDetails = asyncHandler(async (req, res) => {
+    // Get details from req body
+    const { name, email, currentPassword, newPassword, confirmPassword } = req.body;
+  
+    // Trim all input fields
+    const trimmedFullName = name?.trim();
+    const trimmedEmail = email?.trim();
+    const trimmedCurrentPassword = currentPassword?.trim();
+    const trimmedNewPassword = newPassword?.trim();
+    const trimmedConfirmPassword = confirmPassword?.trim();
+  
+    // Validation for required fields
+    if (!trimmedFullName || !trimmedEmail) {
+      throw new ApiError(400, "Full Name and Email are required !");
     }
-
-    const user = await User.findByIdAndUpdate(
-        req.user?._id,
-        {
-            $set: {
-                fullName,
-                email
-            }
-        },
-        {
-            new: true
+  
+    // Find the user by ID
+    const user = await User.findById(req.user?._id);
+    
+  
+    if (!user) {
+      throw new ApiError(404, "User not found !");
+    }
+  
+    // Check if email already exists and it's not the current user's email
+    const existingUser = await User.findOne({ email: trimmedEmail });
+    
+  
+    if (existingUser && existingUser?._id.toString() !== user?._id.toString()) {
+      throw new ApiError(400, "Email already exists !");
+    }
+  
+    // If passwords are provided, perform password validations
+    if (trimmedCurrentPassword && trimmedNewPassword && trimmedConfirmPassword) {
+        
+      if (trimmedNewPassword !== trimmedConfirmPassword) {
+        throw new ApiError(400, "New password and confirm password do not match !");
+      }
+  
+      if (trimmedNewPassword.length < 6) {
+        throw new ApiError(400, "Password must be at least 6 characters long !");
+      }
+  
+      if (trimmedNewPassword === trimmedCurrentPassword) {
+        throw new ApiError(400, "New password must be different from the current password !");
+      }
+  
+      const isPasswordCorrect = await user.comparePassword(trimmedCurrentPassword);
+  
+      if (!isPasswordCorrect) {
+        throw new ApiError(401, "Invalid current password !");
+      }
+  
+      // Update the password
+      user.password = trimmedNewPassword;
+    } else {
+        if (!trimmedCurrentPassword || !trimmedNewPassword || !trimmedConfirmPassword) {
+            throw new ApiError(400, "All password fields are required !");
         }
-    ).select("-password")
-
+    }
+  
+    // Update user details
+    user.fullName = trimmedFullName;
+    user.email = trimmedEmail;
+  
+    await user.save({ validateBeforeSave: false });
+  
+    // Remove the password field before sending the response
+    const updatedUser = user.toObject();
+    delete updatedUser.password;
+  
     return res
-    .status(200)
-    .json(
-        new ApiResponse(200, "User details update Successfully...", user)
-    )
-} )
+      .status(200)
+      .json(new ApiResponse(200, "User details updated successfully.", updatedUser));
+  });
+  
 
 const changeCurrentPassword = asyncHandler( async ( req, res ) => {
     // Algorithem to change password
