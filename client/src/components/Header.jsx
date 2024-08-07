@@ -34,7 +34,8 @@ function Header() {
         }
 
         { !loginUser?.message && isNavShowing && <ul className='nav__menu'>
-            <li><Link to="/authors" onClick={closNavHandler}>Authors</Link></li>
+            <li><Link to="/" onClick={closNavHandler}>Home</Link></li>
+            <li><Link to="/register" onClick={closNavHandler}>Signup</Link></li>
             <li><Link to="/login" onClick={closNavHandler}>Login</Link></li>
           </ ul>
         }
