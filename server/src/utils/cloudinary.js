@@ -24,4 +24,23 @@ const uploadOnCloudinary = async (localFilePath) => {
   }
 };
 
-export { uploadOnCloudinary };
+const deleteOnCloudinary = async (findePost) => {
+  try {
+    if (!findePost) return "File Not Found !" || null;
+
+    const oldThhumbnail = findePost.thumbnail;
+    const splitThumbnail = oldThhumbnail.split("/");
+    const thumbnailFile = splitThumbnail[splitThumbnail.length - 1];
+    const splitDotThumbnail = thumbnailFile.split(".")[0];
+
+    await cloudinary.uploader.destroy(splitDotThumbnail, {
+      resource_typ: "auto",
+    })
+
+    
+  } catch (error) {
+    return null; // return null as upload operation failed
+  }
+};
+
+export { uploadOnCloudinary, deleteOnCloudinary };
